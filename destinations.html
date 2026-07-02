@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Destinations — Almanac</title>
+<meta name="description" content="Eleven regions our planners know from the inside out. Explore where Almanac currently plans private journeys.">
+<style>
+/* ==========================================================================
+   ALMANAC — Design Tokens
+   Palette: ink #211D18 · ivory #F7F2E9 · ivory-2 #EFE7D6
+            verdigris #3C4A3E · verdigris-light #56695A
+            copper #A85C32 · copper-light #C97C4F · stone #8C8272
+   Type: Display — Cormorant (tall classic serif)
+         Body    — Jost (geometric grotesk)
+         Utility — IBM Plex Mono (dates, labels)
+   Signature: the journal ledger — trips as dated line entries with a
+              hand-drawn ink underline that draws itself on load.
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  --ink:#211D18; --ink-2:#2B2620; --ink-3:#34302A;
+  --ivory:#F7F2E9; --ivory-2:#EFE7D6;
+  --verdigris:#3C4A3E; --verdigris-light:#56695A;
+  --copper:#A85C32; --copper-light:#C97C4F;
+  --stone:#8C8272; --stone-dark:#5A5346;
+  --line:rgba(247,242,233,0.14); --line-dark:rgba(33,29,24,0.12);
+  --font-display:'Cormorant',serif;
+  --font-body:'Jost',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --container:1220px;
+  --ease:cubic-bezier(.6,0,.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0;background:var(--ink);color:var(--ivory);font-family:var(--font-body);font-weight:300;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+img{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;margin:0;padding:0;}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:500;margin:0;letter-spacing:0;}
+p{margin:0;}
+button{font-family:inherit;}
+::selection{background:var(--copper);color:var(--ivory);}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important;}}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--copper-light);outline-offset:3px;}
+.wrap{max-width:var(--container);margin:0 auto;padding:0 32px;}
+
+.eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--copper-light);display:inline-flex;align-items:center;gap:10px;}
+.eyebrow::before{content:"";width:20px;height:1px;background:var(--copper-light);display:inline-block;}
+.date-tag{font-family:var(--font-mono);font-size:12px;color:var(--stone);letter-spacing:0.02em;}
+
+/* Header */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 0;background:rgba(33,29,24,0.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.site-header .wrap{display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:var(--font-display);font-size:24px;font-style:italic;letter-spacing:0.01em;display:flex;flex-direction:column;line-height:1;}
+.logo span{font-family:var(--font-mono);font-style:normal;font-size:9px;letter-spacing:0.2em;color:var(--copper-light);margin-top:6px;text-transform:uppercase;}
+.nav-main{display:flex;align-items:center;gap:36px;}
+.nav-main a{font-size:13px;letter-spacing:0.04em;font-weight:400;position:relative;padding:4px 0;color:var(--ivory);opacity:0.78;transition:opacity .25s var(--ease);}
+.nav-main a::after{content:"";position:absolute;left:0;bottom:-3px;width:0;height:1px;background:var(--copper-light);transition:width .35s var(--ease);}
+.nav-main a:hover{opacity:1;}
+.nav-main a:hover::after,.nav-main a.active::after{width:100%;}
+.nav-main a.active{opacity:1;}
+.nav-cta{font-family:var(--font-mono);font-size:12px;letter-spacing:0.05em;border:1px solid var(--copper-light);padding:10px 20px;border-radius:1px;color:var(--copper-light);transition:background .3s var(--ease),color .3s var(--ease);white-space:nowrap;}
+.nav-cta:hover{background:var(--copper-light);color:var(--ink);}
+.nav-toggle-checkbox{display:none;}
+.nav-toggle-label{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;z-index:110;}
+.nav-toggle-label span{width:22px;height:1px;background:var(--ivory);transition:transform .3s var(--ease),opacity .3s var(--ease);}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:12px;letter-spacing:0.05em;padding:15px 26px;border-radius:1px;border:1px solid currentColor;transition:transform .35s var(--ease),background .35s var(--ease),color .35s var(--ease);}
+.btn-primary{background:var(--copper);border-color:var(--copper);color:var(--ivory);}
+.btn-primary:hover{background:transparent;color:var(--copper-light);transform:translateY(-2px);}
+.btn-ghost{color:var(--ivory);border-color:var(--line);}
+.btn-ghost:hover{border-color:var(--ivory);transform:translateY(-2px);}
+.btn-dark{color:var(--ink);border-color:var(--ink);}
+.btn-dark:hover{background:var(--ink);color:var(--ivory);transform:translateY(-2px);}
+.btn-arrow{transition:transform .35s var(--ease);}
+.btn:hover .btn-arrow{transform:translateX(4px);}
+
+/* Hero */
+.hero{position:relative;min-height:100vh;display:flex;align-items:flex-end;padding:170px 0 130px;background:linear-gradient(180deg, rgba(33,29,24,0.4) 0%, rgba(33,29,24,0.45) 50%, var(--ink) 100%), url('https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;overflow:hidden;}
+.hero .wrap{position:relative;z-index:2;}
+.hero-eyebrow{margin-bottom:24px;opacity:0;animation:rise .9s var(--ease) .3s forwards;}
+.hero h1{font-size:clamp(44px,7vw,96px);font-weight:400;line-height:1.02;max-width:16ch;color:var(--ivory);opacity:0;animation:rise 1s var(--ease) .5s forwards;}
+.hero h1 em{font-style:italic;color:var(--copper-light);font-weight:400;position:relative;}
+.hero-underline{position:relative;display:inline-block;}
+.hero-underline svg{position:absolute;left:0;bottom:-6px;width:100%;height:14px;overflow:visible;}
+.hero-underline path{fill:none;stroke:var(--copper-light);stroke-width:2.5;stroke-linecap:round;stroke-dasharray:400;stroke-dashoffset:400;animation:draw-ink 1.2s var(--ease) 1.4s forwards;}
+@keyframes draw-ink{to{stroke-dashoffset:0;}}
+.hero-sub{display:flex;justify-content:space-between;align-items:flex-end;margin-top:46px;gap:40px;opacity:0;animation:rise 1s var(--ease) .8s forwards;}
+.hero-sub p{max-width:38ch;color:var(--stone);font-size:16px;font-weight:300;}
+@keyframes rise{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.scroll-cue{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;color:var(--stone);z-index:2;}
+.scroll-cue::after{content:"";width:1px;height:34px;background:linear-gradient(var(--copper-light),transparent);animation:cue-flow 1.8s ease-in-out infinite;}
+@keyframes cue-flow{0%{transform:scaleY(.3);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(.3);transform-origin:bottom;}}
+
+/* Sections */
+section{position:relative;}
+.section{padding:120px 0;}
+.section-tight{padding:88px 0;}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:64px;border-bottom:1px solid var(--line);padding-bottom:30px;}
+.section-head h2{font-size:clamp(30px,3.6vw,46px);font-weight:400;}
+.section-head .desc{max-width:32ch;color:var(--stone);font-size:15px;font-weight:300;}
+.on-light{background:var(--ivory);color:var(--ink-2);}
+.on-light .section-head{border-color:var(--line-dark);}
+.on-light .section-head .desc{color:var(--stone-dark);}
+.on-light .eyebrow{color:var(--verdigris);}
+.on-light .eyebrow::before{background:var(--verdigris);}
+.on-light .date-tag{color:var(--stone-dark);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.reveal{opacity:0;animation:fadeUp .9s var(--ease) forwards;animation-delay:.1s;}
+.reveal-stagger>*{opacity:0;animation:fadeUp .8s var(--ease) forwards;}
+.reveal-stagger>*:nth-child(1){animation-delay:.05s;}
+.reveal-stagger>*:nth-child(2){animation-delay:.15s;}
+.reveal-stagger>*:nth-child(3){animation-delay:.25s;}
+.reveal-stagger>*:nth-child(4){animation-delay:.35s;}
+.reveal-stagger>*:nth-child(5){animation-delay:.45s;}
+
+/* Intro statement */
+.statement{font-family:var(--font-display);font-weight:400;font-size:clamp(24px,3vw,36px);line-height:1.45;max-width:24ch;color:var(--ivory);}
+.statement em{color:var(--copper-light);font-style:italic;}
+.statement-row{display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:start;}
+.statement-meta{display:flex;flex-direction:column;gap:24px;padding-top:8px;}
+.statement-meta .num{font-family:var(--font-mono);font-size:12px;color:var(--stone);}
+.statement-meta .val{font-family:var(--font-display);font-size:32px;color:var(--copper-light);}
+.statement-meta .lbl{font-size:13px;color:var(--stone);max-width:26ch;font-weight:300;}
+
+/* Ledger — the signature device: journeys as dated line entries */
+.ledger{display:flex;flex-direction:column;}
+.ledger-row{display:grid;grid-template-columns:130px 1fr 1.1fr;gap:44px;padding:40px 0;border-bottom:1px solid var(--line-dark);align-items:center;transition:padding-left .4s var(--ease);}
+.ledger-row:hover{padding-left:10px;}
+.ledger-row .depart{font-family:var(--font-mono);font-size:12.5px;color:var(--verdigris);letter-spacing:0.03em;}
+.ledger-row .depart .place{display:block;font-family:var(--font-display);font-size:26px;font-style:italic;color:var(--ink-2);margin-top:6px;letter-spacing:0;}
+.ledger-img{overflow:hidden;border-radius:2px;aspect-ratio:4/3;}
+.ledger-img img{width:100%;height:100%;object-fit:cover;filter:saturate(0.92);transition:transform .9s var(--ease),filter .9s var(--ease);}
+.ledger-row:hover .ledger-img img{transform:scale(1.06);filter:saturate(1);}
+.ledger-row p{color:var(--stone-dark);font-size:14.5px;margin-bottom:16px;max-width:40ch;font-weight:300;}
+.ledger-row h3{font-size:15px;font-family:var(--font-mono);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-2);margin-bottom:12px;}
+
+/* Stats strip */
+.stats-strip{background:var(--verdigris);padding:64px 0;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;}
+.stat h3{font-family:var(--font-display);font-size:clamp(34px,4vw,52px);color:var(--copper-light);font-weight:400;}
+.stat p{font-size:12.5px;color:rgba(247,242,233,0.75);margin-top:8px;letter-spacing:0.02em;font-family:var(--font-mono);}
+
+/* Testimonial */
+.testimonial{max-width:780px;margin:0 auto;text-align:center;}
+.testimonial blockquote{font-family:var(--font-display);font-style:italic;font-size:clamp(22px,3vw,32px);line-height:1.5;color:var(--ivory);margin-bottom:26px;font-weight:400;}
+.testimonial cite{font-family:var(--font-mono);font-style:normal;font-size:11.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--stone);}
+
+/* CTA band */
+.cta-band{position:relative;padding:130px 0;text-align:center;background:linear-gradient(180deg, rgba(33,29,24,0.55), rgba(33,29,24,0.88)), url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2000&auto=format&fit=crop') center/cover;}
+.cta-band h2{font-size:clamp(32px,5vw,60px);max-width:17ch;margin:0 auto 32px;color:var(--ivory);font-weight:400;}
+.cta-actions{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
+
+/* Footer */
+.site-footer{background:var(--ink-2);padding:90px 0 0;border-top:1px solid var(--line);}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:50px;padding-bottom:70px;border-bottom:1px solid var(--line);}
+.footer-brand .logo{margin-bottom:18px;}
+.footer-brand p{color:var(--stone);font-size:14px;max-width:32ch;margin-bottom:22px;font-weight:300;}
+.footer-col h4{font-family:var(--font-mono);font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--copper-light);margin-bottom:22px;font-weight:500;}
+.footer-col a{display:block;font-size:14px;color:var(--stone);margin-bottom:13px;transition:color .25s var(--ease),padding-left .25s var(--ease);}
+.footer-col a:hover{color:var(--ivory);padding-left:4px;}
+.footer-social{display:flex;gap:14px;}
+.footer-social a{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--font-mono);transition:border-color .3s var(--ease),background .3s var(--ease);}
+.footer-social a:hover{border-color:var(--copper-light);background:rgba(168,92,50,0.12);}
+.newsletter-form{display:flex;border-bottom:1px solid var(--line);padding-bottom:10px;margin-top:4px;}
+.newsletter-form input{flex:1;background:transparent;border:none;color:var(--ivory);font-family:var(--font-body);font-size:14px;padding:8px 0;}
+.newsletter-form input::placeholder{color:var(--stone);}
+.newsletter-form button{background:none;border:none;color:var(--copper-light);font-size:18px;cursor:pointer;transition:transform .3s var(--ease);font-family:var(--font-display);}
+.newsletter-form button:hover{transform:translateX(4px);}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding:26px 0;font-size:12px;color:var(--stone);font-family:var(--font-mono);flex-wrap:wrap;gap:12px;}
+.footer-bottom a{color:var(--stone);}
+.footer-bottom a:hover{color:var(--ivory);}
+
+/* Responsive */
+@media (max-width:980px){
+  .statement-row{grid-template-columns:1fr;}
+  .ledger-row{grid-template-columns:1fr;gap:20px;}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:34px;}
+  .footer-top{grid-template-columns:1fr 1fr;gap:40px;}
+}
+@media (max-width:720px){
+  .wrap{padding:0 22px;}
+  .nav-main{position:fixed;inset:0 0 0 auto;width:78%;max-width:320px;background:var(--ink-2);flex-direction:column;align-items:flex-start;padding:110px 32px 40px;gap:26px;transform:translateX(100%);transition:transform .5s var(--ease);border-left:1px solid var(--line);}
+  .nav-cta{display:none;}
+  .nav-toggle-label{display:flex;}
+  .nav-toggle-checkbox:checked~.nav-main{transform:translateX(0);}
+  .nav-toggle-checkbox:checked~.nav-toggle-label span:nth-child(1){transform:translateY(6px) rotate(45deg);}
+  .nav-toggle-checkbox:checked~.nav-toggle-label span:nth-child(2){opacity:0;}
+  .nav-toggle-checkbox:checked~.nav-toggle-label span:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+  .hero{padding:150px 0 90px;align-items:flex-end;}
+  .hero-sub{flex-direction:column;align-items:flex-start;gap:22px;}
+  .section{padding:80px 0;}
+  .section-head{flex-direction:column;align-items:flex-start;gap:18px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .footer-top{grid-template-columns:1fr;gap:44px;}
+}
+
+.page-hero{padding:170px 0 90px;position:relative;border-bottom:1px solid var(--line);}
+.page-hero h1{font-size:clamp(38px,5.6vw,68px);max-width:19ch;margin-top:20px;font-weight:400;}
+.page-hero .desc{max-width:48ch;color:var(--stone);margin-top:22px;font-size:16px;font-weight:300;}
+.page-hero-meta{display:flex;gap:40px;margin-top:44px;flex-wrap:wrap;padding-top:28px;border-top:1px solid var(--line);}
+.page-hero-meta div span{display:block;}
+.page-hero-meta .k{font-family:var(--font-mono);font-size:11px;color:var(--copper-light);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;}
+.page-hero-meta .v{font-size:14px;color:var(--stone);}
+.filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:36px;}
+.pill{font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;text-transform:uppercase;padding:8px 16px;border:1px solid var(--line);border-radius:20px;color:var(--stone);}
+.pill.is-active{border-color:var(--copper-light);color:var(--copper-light);}
+@media (max-width:720px){
+  .page-hero{padding:140px 0 60px;}
+  .page-hero-meta{gap:26px;}
+}
+</style></head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Almanac<span>Private Journeys · Est. 2014</span></a>
+    <input type="checkbox" id="navToggle" class="nav-toggle-checkbox">
+    <nav class="nav-main">
+      <a href="index.html">Home</a>
+      <a class="active" href="destinations.html">Destinations</a>
+      <a href="packages.html">Packages</a>
+      <a href="about.html">About Us</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+    <a class="nav-cta" href="contact.html">Start a Trip</a>
+    <label for="navToggle" class="nav-toggle-label" aria-label="Toggle menu"><span></span><span></span><span></span></label>
+  </div>
+</header>
+
+<main>
+  <section class="page-hero">
+    <div class="wrap">
+      <div class="eyebrow reveal">Eleven Regions</div>
+      <h1 class="reveal">We only plan where a planner has already lived for years.</h1>
+      <p class="desc reveal">No destination joins this list because it photographs well. It joins because someone on staff can tell you which week the light is best and which restaurant closes on Tuesdays.</p>
+      <div class="filter-row reveal">
+        <span class="pill is-active">All Regions</span>
+        <span class="pill">Mountain</span>
+        <span class="pill">Coastal</span>
+        <span class="pill">Desert</span>
+        <span class="pill">Culture</span>
+      </div>
+      <div class="page-hero-meta reveal">
+        <div><span class="k">Active regions</span><span class="v">11</span></div>
+        <div><span class="k">Continents</span><span class="v">5</span></div>
+        <div><span class="k">Newest addition</span><span class="v">Oaxaca, 2024</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section on-light">
+    <div class="wrap">
+      <div class="ledger">
+
+        <div class="ledger-row reveal">
+          <div class="depart">Best Mar–May<span class="place">Kyoto</span></div>
+          <div class="ledger-img"><img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=1200&auto=format&fit=crop" alt="Kyoto temple garden"></div>
+          <div>
+            <h3>Japan · Kansai Region</h3>
+            <p>Naomi has lived in Kyoto since 2009 and plans every itinerary around the two quiet weeks before the crowds arrive for bloom season.</p>
+            <a class="btn btn-dark" href="packages.html">View Packages <span class="btn-arrow">→</span></a>
+          </div>
+        </div>
+
+        <div class="ledger-row reveal">
+          <div class="depart">Best Jun–Sep<span class="place">Dolomites</span></div>
+          <div class="ledger-img"><img src="https://images.unsplash.com/photo-1551524559-8af4e6624178?q=80&w=1200&auto=format&fit=crop" alt="Dolomites mountains"></div>
+          <div>
+            <h3>Italy · South Tyrol</h3>
+            <p>A hut-to-hut traverse above the tree line, staying in family-run rifugi that never appear on booking platforms.</p>
+            <a class="btn btn-dark" href="packages.html">View Packages <span class="btn-arrow">→</span></a>
+          </div>
+        </div>
+
+        <div class="ledger-row reveal">
+          <div class="depart">Best Oct–Dec<span class="place">Oaxaca</span></div>
+          <div class="ledger-img"><img src="https://images.unsplash.com/photo-1518659526054-190340b32735?q=80&w=1200&auto=format&fit=crop" alt="Oaxaca street market"></div>
+          <div>
+            <h3>Mexico · Oaxaca Valley</h3>
+            <p>Our newest region, added after our lead planner spent three years asking us to finally say yes to her hometown.</p>
+            <a class="btn btn-dark" href="packages.html">View Packages <span class="btn-arrow">→</span></a>
+          </div>
+        </div>
+
+        <div class="ledger-row reveal">
+          <div class="depart">Best Apr–Oct<span class="place">Scottish Highlands</span></div>
+          <div class="ledger-img"><img src="https://images.unsplash.com/photo-1500259783852-4a5ec20e56ae?q=80&w=1200&auto=format&fit=crop" alt="Scottish Highlands loch and mountains"></div>
+          <div>
+            <h3>Scotland · Highlands</h3>
+            <p>Single-track roads, working distilleries, and a driver-guide who knows every farmhouse that takes overnight guests.</p>
+            <a class="btn btn-dark" href="packages.html">View Packages <span class="btn-arrow">→</span></a>
+          </div>
+        </div>
+
+        <div class="ledger-row reveal">
+          <div class="depart">Best May–Sep<span class="place">Northern Norway</span></div>
+          <div class="ledger-img"><img src="https://images.unsplash.com/photo-1518623489648-a173ef7824f3?q=80&w=1200&auto=format&fit=crop" alt="Norwegian fjord landscape"></div>
+          <div>
+            <h3>Norway · Lofoten</h3>
+            <p>Midnight sun, working fishing villages, and a coastal boat route re-planned every season based on that year's ice.</p>
+            <a class="btn btn-dark" href="packages.html">View Packages <span class="btn-arrow">→</span></a>
+          </div>
+        </div>
+
+        <div class="ledger-row reveal">
+          <div class="depart">Best Sep–Apr<span class="place">Patagonia</span></div>
+          <div class="ledger-img"><img src="https://images.unsplash.com/photo-1531168556467-80aace0d0144?q=80&w=1200&auto=format&fit=crop" alt="Torres del Paine towers"></div>
+          <div>
+            <h3>Chile · Torres del Paine</h3>
+            <p>Nine days along the Chilean side of the Andes, with a route that changes weekly depending on how the wind is behaving.</p>
+            <a class="btn btn-dark" href="packages.html">View Packages <span class="btn-arrow">→</span></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap">
+      <h2 class="reveal">Don't see the region you have in mind?</h2>
+      <div class="cta-actions reveal">
+        <a class="btn btn-primary" href="contact.html">Propose a Region <span class="btn-arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">Almanac<span>Private Journeys · Est. 2014</span></a>
+        <p>A small studio planning one unhurried, private itinerary at a time since 2014.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="Journal">JN</a>
+          <a href="#" aria-label="X">X</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <a href="index.html">Home</a>
+        <a href="destinations.html">Destinations</a>
+        <a href="packages.html">Packages</a>
+        <a href="about.html">About Us</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+      <div class="footer-col">
+        <h4>Studio</h4>
+        <a href="about.html">Our Planners</a>
+        <a href="about.html">Field Notes</a>
+        <a href="contact.html">Press</a>
+        <a href="contact.html">Careers</a>
+      </div>
+      <div class="footer-col">
+        <h4>Dispatch</h4>
+        <p style="color:var(--stone);font-size:14px;margin-bottom:16px;">One entry a month. Nothing else.</p>
+        <form class="newsletter-form">
+          <input type="email" placeholder="your@email.com" required>
+          <button type="submit" aria-label="Subscribe">→</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Almanac Private Journeys. All rights reserved.</span>
+      <span class="date-tag">Studio — Lisbon, Portugal</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
